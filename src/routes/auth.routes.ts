@@ -6,8 +6,8 @@ const router: Router = Router()
 
 router.post('/signup', authControllers.signUp) // register
 
-/* router.post('/signin', authControllers.signIn) // login
+router.post('/signin', authControllers.signIn) // login
 
-router.post('/signout', authControllers.signOut) // logout */
+router.post('/signout', authControllers.signOut) // logout
 
 export default router

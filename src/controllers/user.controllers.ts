@@ -21,6 +21,7 @@ export const getAllUsers = async (_req: Request, res: Response): Promise<Respons
 
 export const getUserById = async (req: Request, res: Response): Promise<Response> => {
     try {
+        
         const id = req.params.user_id
 
         const result = await User.findByPk(id) // Find a user by primary key
