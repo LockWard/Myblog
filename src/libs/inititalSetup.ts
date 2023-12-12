@@ -1,7 +1,7 @@
 import Role from '../models/role.models.js'
 import User from '../models/user.models.js'
 
-import { ADMIN_EMAIL, ADMIN_USERNAME, ADMIN_PASSWORD } from '../config/config.js'// Setting to create the user admin
+import { ADMIN_EMAIL, ADMIN_USERNAME, ADMIN_PASSWORD } from '../config/config.js'// Settings to create the user admin
 
 export const createRoles = async () => {
     try {
@@ -10,8 +10,7 @@ export const createRoles = async () => {
 
             if (role.length > 0) {
         
-                console.log('Role admin, moderator and admin is alredy exist.')
-                return
+                console.log('Role admin, moderator and admin are already exist.')
 
             }
             else {
@@ -64,6 +63,7 @@ export const createAdmin = async () => {
             console.log('The user admin is already exist.')
 
         }
+
     } catch (error) {
 
         console.error(error)

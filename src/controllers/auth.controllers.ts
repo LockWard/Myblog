@@ -18,3 +18,11 @@ export const signUp = async (_req: Request, res: Response): Promise<Response> =>
 
     }
 }
+
+export const signIn = async (req: Request, res: Response): Promise<Response> => {
+
+}
+
+export const signOut = async (req: Request, res: Response): Promise<Response> => {
+        
+}

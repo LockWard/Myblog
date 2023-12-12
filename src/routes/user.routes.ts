@@ -12,4 +12,6 @@ router.post('/', userControllers.postUser)
 
 router.put('/:user_id', userControllers.putUser)
 
+router.delete(':user_id', userControllers.deleteUser)
+
 export default router
