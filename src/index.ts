@@ -1,4 +1,6 @@
 import express from 'express'
+import passport from 'passport'
+import passportMiddleware from './middlewares/passport.js';
 import bodyParser from 'body-parser'
 import helmet from 'helmet'
 
@@ -17,6 +19,8 @@ const app = express()// The main app
 app.use(helmet())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(express.json())
+app.use(passport.initialize());
+passport.use(passportMiddleware);
 
 // Routes
 app.use('/api/user', userRoutes)
