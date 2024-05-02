@@ -122,6 +122,7 @@ DROP TABLE if EXISTS post;
 
 CREATE TABLE post(
     post_id VARCHAR(100) NOT NULL,
+    post_title VARCHAR(125) NOT NULL,
     post_text TEXT NOT NULL,
     post_media VARCHAR(255) DEFAULT NULL,
     post_num_votes INT DEFAULT 0,
