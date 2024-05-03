@@ -32,6 +32,8 @@ CREATE TABLE user (
     user_first_name VARCHAR(100) NOT NULL,
     user_last_name VARCHAR(100) NOT NULL,
     user_follower_count INT DEFAULT 0,
+    -- user_post_count INT DEFAULT 0,
+    -- user_comment_count INT DEFAULT 0,
     user_description TINYTEXT DEFAULT NULL,
     user_password VARCHAR(125) NOT NULL,
     user_status BOOLEAN DEFAULT true,
@@ -323,3 +325,18 @@ DELIMITER ;
 -- select *
 -- from information_schema.referential_constraints
 -- where constraint_schema = 'myblog_db';
+
+-- Top 3 usuarios con mayor número de seguidores
+SELECT following_id, COUNT(follower_id) AS followers
+FROM followers
+GROUP BY following_id
+ORDER BY followers DESC
+LIMIT 3;
+
+-- Top 3 usuarios pero haciendo JOIN
+SELECT users.user_id, users.user_handle, users. first_name, following_id, COUNT(follower_id) AS followers
+FROM followers
+JOIN users ON users.user_id = followers.following_id
+GROUP BY following_id
+ORDER BY followers DESC
+LIMIT 3;
