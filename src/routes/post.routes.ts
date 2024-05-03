@@ -1,19 +1,21 @@
 import { Router } from 'express';
+import passport from 'passport';
 
 import * as postControllers from '../controllers/post.controllers.js';
+import { isAdmin, isModerator } from '../middlewares/checkRoles.js';
 
-const router: Router = Router()
+const router: Router = Router();
 
-router.get('/', postControllers.getAllPosts)
+router.get('/', postControllers.getAllPosts);
 
-router.get('/:post_id', postControllers.getPostById)
+router.get('/:post_id', postControllers.getPostById);
 
-router.post('/', postControllers.postPost)
+router.post('/', passport.authenticate('jwt', { session: false }), postControllers.createPost);
 
-router.put('/:post_id', postControllers.putPost)
+router.put('/:post_id', passport.authenticate('jwt', { session: false }), postControllers.updatePost);
 
-router.delete('/:post_id', postControllers.deletePost)
+router.put('/delete/:post_id', passport.authenticate('jwt', { session: false }), [isModerator, isAdmin], postControllers.deletePost);
 
-export default router
+export default router;
 
 
