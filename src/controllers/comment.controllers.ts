@@ -1,31 +1,41 @@
 import { Request, Response } from 'express';
 
 import Comment from '../models/comment.models.js';
-// import { v4 as uuidv4 } from 'uuid';
-// import { UUIDV4 } from 'sequelize';
+import Sequelize from 'sequelize';
 
 export const getAllComments = async (_req: Request, res: Response): Promise<Response> => {
     try {
         
-        const result = await Comment.findAll() // Create a user
-        
-        return res.status(200).json(result)
+        const result = await Comment.findAll(); // Create a Comment
+
+        return res.status(200).json({ result });
 
     } catch (error) {
 
-        console.error('Unable to connect to the database:', error)
-        return res.status(500).json({ error: 'Internal Server Error' })
+        console.error('Unable to connect to the database:', error);
+        return res.status(500).json({ error: 'Internal Server Error' });
 
     }
 }
 
 export const getCommentById = async (req: Request, res: Response): Promise<Response> => {
+    
+    const comment_id = req.params.comment_id;
+    
     try {
-        const comment_id = req.params.user_id
 
-        const result = await Comment.findByPk(comment_id) // Find a user by primary key
+        const result = await Comment.findByPk(comment_id); // Find a Comment by primary key
 
-        return res.status(200).json({ result })
+        if (!result) {
+
+            return res.status(404).json({ error: `Comment ${comment_id} not found.`});
+
+        } else {
+
+            return res.status(200).json({ result });
+
+        }
+
 
     } catch (error) {
 
@@ -35,88 +45,90 @@ export const getCommentById = async (req: Request, res: Response): Promise<Respo
     }
 }
 
-export const postComment = async (req: Request, res: Response): Promise<Response> => {
+export const createComment = async (req: Request, res: Response): Promise<Response> => {
+    
+    const { comment_text, user_id, post_id } = req.body;
+    
     try {
-
-        const { comment_content, user_id, post_id } = req.body
         
         const comment = await Comment.create({
-            comment_content: comment_content,
+            comment_text: comment_text,
             user_id: user_id,
-            post_id: post_id,
-        })
+            post_id: post_id
+        });
 
-        console.log(comment.toJSON())
-        return res.status(200).json({ comment })
+        // console.log(comment.toJSON());
+        return res.status(201).json({ comment });
 
     } catch (error) {
 
-        console.error('Unable to connect to the database:', error)
-        return res.status(500).json({ error: 'Internal Server Error' })
+        console.error('Unable to connect to the database:', error);
+        return res.status(500).json({ error: 'Internal Server Error' });
 
     }
 }
 
-export const putComment = async (req: Request, res: Response): Promise<Response> => {
+export const updateComment = async (req: Request, res: Response): Promise<Response> => {
+    
+    const comment_id = req.params.comment_id;
+    const { comment_text, post_id } = req.body;
+    
     try {
-
-        // const { id } = req.params.id
-        const { comment_content, user_id, post_id } = req.body
         
-        const result = await Comment.findByPk(req.params.comment_id)
+        const result = await Comment.findByPk(comment_id);
 
-        if (result) {
-
-            return res.status(400).json({ error: 'Comment not found.' })
-
+        if (!result) {
+            return res.status(404).json({ error: 'Comment not found.' });
         }
         
         const comment = await Comment.update({
-            comment_content: comment_content,
-            user_id: user_id,
-            post_id: post_id,
+            comment_text: comment_text,
         }, {
-            where: { comment_id: req.params.comment_id }
-        })
+            where: { 
+                [Sequelize.Op.and]:
+                    [{ comment_id: comment_id }, { post_id: post_id}, { user_id: result.user_id }],
+            }
+        });
 
-        console.log(comment)
-        return res.status(200).json({ comment })
+        // console.log(comment)
+        return res.status(204).json({ comment });
+        // return res.status(200).json(comment[0])
 
     } catch (error) {
 
-        console.error('Unable to connect to the database:', error)
-        return res.status(500).json({ error: 'Internal Server Error' })
+        console.error('Unable to connect to the database:', error);
+        return res.status(500).json({ error: 'Internal Server Error' });
 
     }
 }
 
 export const deleteComment = async (req: Request, res: Response): Promise<Response> => {
+    
+    const comment_id = req.params.comment_id;
+    
     try {
-
-        const comment_id = req.params.comment_id
-        const { comment_status } = req.body
         
-        const result = await Comment.findByPk(comment_id)
+        const result = await Comment.findByPk(comment_id);
 
-        if (result) {
-
-            return res.status(400).json({ error: 'Comment not found.' })
-
+        if (!result) {
+            return res.status(404).json({ error: 'Comment not found.' });
         }
         
+        const comment_status = await Comment.findOne({ where: { comment_id: comment_id }});
+
         const comment = await Comment.update({
-            comment_status: comment_status,
+            comment_status: comment_status?.comment_status ? false : true
         }, {
             where: { comment_id: comment_id }
-        })
+        });
 
-        console.log(comment)
-        return res.status(200).json({ comment })
+        // console.log(comment);
+        return res.status(200).json({ comment });
 
     } catch (error) {
 
-        console.error('Unable to connect to the database:', error)
-        return res.status(500).json({ error: 'Internal Server Error' })
+        console.error('Unable to connect to the database:', error);
+        return res.status(500).json({ error: 'Internal Server Error' });
 
     }
 }
