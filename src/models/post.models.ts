@@ -6,8 +6,11 @@ import User from './user.models.js'; // Import the Sequelize model for the forei
 class Post extends Model {
     declare post_id: string;
     declare post_title: string;
-    declare post_content: string;
+    declare post_text: string;
     declare post_media: string;
+    declare post_num_votes: number;
+    declare post_num_comments: number;
+    declare post_num_shared: number;
     declare post_status: boolean;
     declare created_at: string;
     declare updated_at: string;
@@ -22,18 +25,36 @@ Post.init(
             defaultValue: DataTypes.UUIDV4,
         },
         post_title: {
-            type: DataTypes.STRING,
+            type: DataTypes.STRING(125),
             allowNull: false,
         },
-        post_content: {
-            type: DataTypes.STRING,
+        post_text: {
+            type: DataTypes.TEXT('medium'),
             allowNull: false,
         },
         post_media: {
             type: DataTypes.STRING,
             allowNull: true,
-            defaultValue: null,
+
+            validate: {
+                isUrl: true,
+            }
         },
+        post_num_votes: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            defaultValue: 0,
+        },
+        post_num_comments: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            defaultValue: 0,
+        },
+        post_num_shared: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            defaultValue: 0,
+        },      
         post_status: {
             type: DataTypes.BOOLEAN,
             allowNull: false,
@@ -55,11 +76,11 @@ Post.init(
         updatedAt: 'updated_at',
         timestamps: true,
         freezeTableName: true,
-        modelName: 'Post', // Set the model name
+        // modelName: 'Post', // Set the model name
     }
 )
 
-/* await Post.sync({ alter: true})
-console.log("The table for the Post model was just changes in the table to make it match the model!") */
+await Post.sync();
+console.log("The table for the Post model was just changes in the table to make it match the model!");
 
-export default Post
+export default Post;

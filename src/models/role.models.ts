@@ -17,7 +17,7 @@ Role.init(
             defaultValue: DataTypes.UUIDV4,
         },
         role_name: {
-            type: DataTypes.STRING,
+            type: DataTypes.STRING(100),
             allowNull: false,
             unique: true,
         },
@@ -28,11 +28,11 @@ Role.init(
         updatedAt: 'updated_at',
         timestamps: true,
         freezeTableName: true,
-        modelName: 'Role', // Set the model name
+        // modelName: 'Role', // Set the model name
     },
 )
 
-/* await Role.sync({ alter: true })
-console.log("The table for the Role model was just changes in the table to make it match the model!") */
+await Role.sync();
+console.log("The table for the Role model was just changes in the table to make it match the model!");
 
-export default Role
+export default Role;

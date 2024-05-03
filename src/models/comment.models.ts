@@ -6,7 +6,8 @@ import Post from './post.models.js'; // ...
 
 class Comment extends Model {
     declare comment_id: string;
-    declare comment_content: string;
+    declare comment_text: string;
+    declare comment_num_votes: number;
     declare comment_status: boolean;
     declare created_at: string;
     declare updated_at: string;
@@ -21,9 +22,14 @@ Comment.init(
             primaryKey: true,
             defaultValue: DataTypes.UUIDV4,
         },
-        comment_content: {
-            type: DataTypes.STRING,
+        comment_text: {
+            type: DataTypes.TEXT('tiny'),
             allowNull: false,
+        },
+        comment_num_votes: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            defaultValue: 0,
         },
         comment_status: {
             type: DataTypes.BOOLEAN,
@@ -55,11 +61,11 @@ Comment.init(
         updatedAt: 'updated_at',
         timestamps: true,
         freezeTableName: true,
-        modelName: 'Comment', // Set the model name
+        // modelName: 'Comment', // Set the model name
     }
 )
 
-/* await Comment.sync({ alter: true})
-console.log("The table for the Comment model was just changes in the table to make it match the model!") */
+await Comment.sync();
+console.log("The table for the Comment model was just changes in the table to make it match the model!");
 
-export default Comment
+export default Comment;
