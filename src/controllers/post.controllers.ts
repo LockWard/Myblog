@@ -20,7 +20,7 @@ export const getAllPosts = async (_req: Request, res: Response): Promise<Respons
 
 export const getPostById = async (req: Request, res: Response): Promise<Response> => {
     
-    const post_id = req.params.post_id;
+    const { post_id } = req.params;
     
     try {
 
@@ -36,7 +36,6 @@ export const getPostById = async (req: Request, res: Response): Promise<Response
 
         }
 
-
     } catch (error) {
 
         console.error('Unable to connect to the database:', error)
@@ -47,18 +46,12 @@ export const getPostById = async (req: Request, res: Response): Promise<Response
 
 export const createPost = async (req: Request, res: Response): Promise<Response> => {
     
-    const { post_title, post_text, post_media, user_id } = req.body;
+    const { body } = req;
     
     try {
         
-        const post = await Post.create({
-            post_title: post_title,
-            post_text: post_text,
-            post_media: post_media,
-            user_id: user_id
-        });
+        const post = await Post.create(body);
 
-        // console.log(post.toJSON());
         return res.status(201).json({ post });
 
     } catch (error) {
@@ -71,31 +64,28 @@ export const createPost = async (req: Request, res: Response): Promise<Response>
 
 export const updatePost = async (req: Request, res: Response): Promise<Response> => {
     
-    const post_id = req.params.post_id;
-    const { post_title, post_text, post_media } = req.body;
+    const { post_id } = req.params;
+    const { body } = req;
     
     try {
         
         const result = await Post.findByPk(post_id);
 
         if (!result) {
+
             return res.status(404).json({ error: 'Post not found.' });
+
         }
         
-        const post = await Post.update({
-            post_title: post_title,
-            post_text: post_text,
-            post_media: post_media,
-        }, {
+        await result.update(body, {
             where: { 
                 [Sequelize.Op.and]:
                     [{ post_id: post_id }, { user_id: result.user_id }],
             }
         });
+        await result.save();
 
-        // console.log(post)
-        return res.status(204).json({ post });
-        // return res.status(200).json(post[0])
+        return res.status(204).json({ result });
 
     } catch (error) {
 
@@ -107,25 +97,24 @@ export const updatePost = async (req: Request, res: Response): Promise<Response>
 
 export const deletePost = async (req: Request, res: Response): Promise<Response> => {
     
-    const post_id = req.params.post_id;
+    const { post_id } = req.params;
     
     try {
         
         const result = await Post.findByPk(post_id);
 
         if (!result) {
+
             return res.status(404).json({ error: 'Post not found.' });
+
         }
-        
-        const post_status = await Post.findOne({ where: { post_id: post_id }});
 
         const post = await Post.update({
-            post_status: post_status?.post_status ? false : true
+            post_status: result?.post_status ? false : true
         }, {
             where: { post_id: post_id }
         });
 
-        // console.log(post);
         return res.status(200).json({ post });
 
     } catch (error) {

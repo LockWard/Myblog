@@ -1,9 +1,8 @@
 import { DataTypes, Model } from 'sequelize';
 
-import { sequelize } from '../database/connection.js'; // Import the Sequelize instance
-
+import { sequelize } from '../database/connection.js'; // Import the sequelize instance
 import User from './user.models.js'; // Import the Sequelize model for the foreign key
-import Post from './post.models.js'; // the same here
+import Post from './post.models.js';
 
 class Post_vote extends Model {
     declare user_id: string;
@@ -33,13 +32,14 @@ Post_vote.init(
             }
         },
         post_vote_reaction: {
-            type: DataTypes.ENUM('Like', 'Dislike'),
-            defaultValue: null,
+            type: DataTypes.ENUM('upvote', 'downvote'),
+            allowNull: false,
         },
     },
     {
         sequelize,
         createdAt: 'created_at',
+        updatedAt: false,
         timestamps: true,
         freezeTableName: true,
         // modelName: 'Post_vote', // Set the model name

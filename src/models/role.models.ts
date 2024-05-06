@@ -1,6 +1,6 @@
 import { DataTypes, Model } from 'sequelize';
 
-import { sequelize } from '../database/connection.js'; // Import the Sequelize instance
+import { sequelize } from '../database/connection.js'; // Import the sequelize instance
 
 class Role extends Model {
     declare role_id: string;

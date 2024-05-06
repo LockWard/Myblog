@@ -1,7 +1,6 @@
 import { DataTypes, Model } from 'sequelize';
 
-import { sequelize } from '../database/connection.js'; // Import the Sequelize instance
-
+import { sequelize } from '../database/connection.js'; // Import the sequelize instance
 import User from './user.models.js'; // Import the Sequelize model for the foreign key
 
 class Follower extends Model {
@@ -34,6 +33,7 @@ Follower.init(
     {
         sequelize,
         createdAt: 'created_at',
+        updatedAt: false,
         timestamps: true,
         freezeTableName: true,
         // modelName: 'Follower', // Set the model name

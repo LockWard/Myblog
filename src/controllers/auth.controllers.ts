@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import Sequelize from 'sequelize';
 import jwt from 'jsonwebtoken';
 
@@ -7,8 +7,8 @@ import Role from '../models/role.models.js';
 import { JWT_SECRET } from '../config/config.js';
 
 // Create token
-function createToken(id?: string, role_id?: string) {
-return jwt.sign({ id, role_id }, JWT_SECRET, {
+function createToken(user_id?: string, role_id?: string) {
+return jwt.sign({ user_id, role_id }, JWT_SECRET, {
 
         expiresIn: '8h'
 
@@ -17,43 +17,36 @@ return jwt.sign({ id, role_id }, JWT_SECRET, {
 // Create register of user
 export const signUp = async (req: Request, res: Response): Promise<Response> => {
     
-    const { user_profile, user_handle, user_email, user_first_name, 
-        user_last_name, user_description, user_password } = req.body;
+    const { body } = req;
     
     try {
+        
+        const role = await Role.findOne({ where: { role_name: ['user'] } });
 
-        const result = await User.findOne({
+        const [user, result] = await User.findOrCreate({
             where: {
-                [Sequelize.Op.or]: 
-                    [{ user_email: user_email }, { user_handle: user_handle }],
+                [Sequelize.Op.or]:
+                [{ user_email: body.user_email }, { user_handle: body.user_handle }],
+            },
+            defaults: {
+                user_profile: body.user_profile,
+                user_handle: body.user_handle,
+                user_email: body.user_email,
+                user_first_name: body.user_first_name,
+                user_last_name: body.user_last_name,
+                user_description: body.user_description,
+                user_password: body.user_password,
+                role_id: role?.role_id
             },
         });
 
-        if (result) {
-            return res.status(400).json({ error: 'This email or handle is already used.' });
+        if (!result) {
+
+            return res.status(400).json({ error: 'This email or handle are already used.' });
+
         }
-
-        const role = await Role.findOne({ where: { role_name: ['user'] } });
-
-        const user = await User.create({
-            user_profile: user_profile,
-            user_handle: user_handle,
-            user_email: user_email,
-            user_first_name: user_first_name,
-            user_last_name: user_last_name,
-            user_description: user_description,
-            user_password: user_password,
-            role_id: (role?.role_id)
-        });
-
-        return res.status(201).json({
-
-            // message: `User '${user_name}' created. Token: ` + 
-            // createToken(result.user_id as unknown as string)
-
-            message: createToken(user.user_id, user.role_id)
-
-        });
+        
+        return res.status(201).json({ message: createToken(user.user_id, user.role_id )});
 
     } catch (error) {
 
@@ -66,28 +59,34 @@ export const signUp = async (req: Request, res: Response): Promise<Response> => 
 export const signIn = async (req: Request, res: Response): Promise<Response> => {
     try {
         
-        const { user_email_or_handle, user_password } = req.body;
+        const { body } = req;
 
-        if(!user_email_or_handle || !user_password){
+        if(!body.user_email_or_handle || !body.user_password){
+
             return res.status(400).json({ error: 'Please send your email, handle or password.'});
+
         }
 
         const result = await User.findOne({
             where: {
                 [Sequelize.Op.or]: 
-                    [{ user_email: user_email_or_handle }, { user_handle: user_email_or_handle }],
+                    [{ user_email: body.user_email_or_handle }, { user_handle: body.user_email_or_handle }],
             },
         });
 
         if (!result) {
-            return res.status(404).json({ error: `User '${user_email_or_handle}' not found.` });
+
+            return res.status(404).json({ error: `User '${body.user_email_or_handle}' not found.` });
+
         }
         
         if (result.user_status == false) {
+
             return res.status(404).json({ message: 'This account is disabled. Please comnunicated with the administrator.'});
+
         }
 
-        const passwordMatch = await comparePassword(user_password, result.user_password);
+        const passwordMatch = await comparePassword(body.user_password, result.user_password);
         
         if (!passwordMatch) {
 

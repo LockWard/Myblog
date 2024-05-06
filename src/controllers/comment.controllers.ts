@@ -20,7 +20,7 @@ export const getAllComments = async (_req: Request, res: Response): Promise<Resp
 
 export const getCommentById = async (req: Request, res: Response): Promise<Response> => {
     
-    const comment_id = req.params.comment_id;
+    const { comment_id } = req.params;
     
     try {
 
@@ -36,7 +36,6 @@ export const getCommentById = async (req: Request, res: Response): Promise<Respo
 
         }
 
-
     } catch (error) {
 
         console.error('Unable to connect to the database:', error)
@@ -47,17 +46,12 @@ export const getCommentById = async (req: Request, res: Response): Promise<Respo
 
 export const createComment = async (req: Request, res: Response): Promise<Response> => {
     
-    const { comment_text, user_id, post_id } = req.body;
+    const { body } = req;
     
     try {
         
-        const comment = await Comment.create({
-            comment_text: comment_text,
-            user_id: user_id,
-            post_id: post_id
-        });
+        const comment = await Comment.create(body);
 
-        // console.log(comment.toJSON());
         return res.status(201).json({ comment });
 
     } catch (error) {
@@ -70,8 +64,8 @@ export const createComment = async (req: Request, res: Response): Promise<Respon
 
 export const updateComment = async (req: Request, res: Response): Promise<Response> => {
     
-    const comment_id = req.params.comment_id;
-    const { comment_text, post_id } = req.body;
+    const { comment_id } = req.params;
+    const { body } = req;
     
     try {
         
@@ -81,18 +75,14 @@ export const updateComment = async (req: Request, res: Response): Promise<Respon
             return res.status(404).json({ error: 'Comment not found.' });
         }
         
-        const comment = await Comment.update({
-            comment_text: comment_text,
-        }, {
+        const comment = await Comment.update(body, {
             where: { 
                 [Sequelize.Op.and]:
-                    [{ comment_id: comment_id }, { post_id: post_id}, { user_id: result.user_id }],
+                    [{ comment_id: comment_id }, { post_id: body.post_id}, { user_id: result.user_id }],
             }
         });
 
-        // console.log(comment)
         return res.status(204).json({ comment });
-        // return res.status(200).json(comment[0])
 
     } catch (error) {
 
@@ -104,25 +94,24 @@ export const updateComment = async (req: Request, res: Response): Promise<Respon
 
 export const deleteComment = async (req: Request, res: Response): Promise<Response> => {
     
-    const comment_id = req.params.comment_id;
+    const { comment_id } = req.params;
     
     try {
         
         const result = await Comment.findByPk(comment_id);
 
         if (!result) {
+
             return res.status(404).json({ error: 'Comment not found.' });
+
         }
-        
-        const comment_status = await Comment.findOne({ where: { comment_id: comment_id }});
 
         const comment = await Comment.update({
-            comment_status: comment_status?.comment_status ? false : true
+            comment_status: result?.comment_status ? false : true
         }, {
             where: { comment_id: comment_id }
         });
 
-        // console.log(comment);
         return res.status(200).json({ comment });
 
     } catch (error) {

@@ -1,6 +1,6 @@
 import { DataTypes, Model } from 'sequelize';
 
-import { sequelize } from '../database/connection.js'; // Import the Sequelize instance
+import { sequelize } from '../database/connection.js'; // Import the sequelize instance
 import User from './user.models.js'; // Import the Sequelize model for the foreign key
 
 class Direct_message extends Model {

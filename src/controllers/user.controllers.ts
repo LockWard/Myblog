@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import Sequelize from 'sequelize';
 
-import User, { hashPassword } from '../models/user.models.js';
+import User from '../models/user.models.js';
 
 export const getAllUsers = async (_req: Request, res: Response): Promise<Response> => {
     try {
@@ -20,7 +20,7 @@ export const getAllUsers = async (_req: Request, res: Response): Promise<Respons
 
 export const getUserById = async (req: Request, res: Response): Promise<Response> => {
     
-    const user_id = req.params.user_id;
+    const { user_id } = req.params;
     
     try {
 
@@ -51,7 +51,9 @@ export const getUserByUserhandle = async (req: Request, res: Response): Promise<
     try {
 
         if (!query) {
+
             return res.status(404).json({ error: 'Search query parameter "q" is required' });
+
         }
         
         const result = await User.findAll({
@@ -73,43 +75,24 @@ export const getUserByUserhandle = async (req: Request, res: Response): Promise<
 
 export const createUser = async (req: Request, res: Response): Promise<Response> => {
     
-    const { user_profile, user_handle, user_email, user_first_name, 
-        user_last_name, user_description, user_password, role_id } = req.body;
+    const { body } = req;
     
     try {
-        
-/*         const result = await User.findOne({
-            where: {
-                user_email: user_email,
-                user_handle: user_handle
-            }
-        }); */
 
-        const result = await User.findOne({
+        const [user, result] = await User.findOrCreate({
             where: {
                 [Sequelize.Op.or]:
-                    [{ user_email: user_email }, { user_handle: user_handle }],
+                [{ user_email: body.user_email }, { user_handle: body.user_handle }],
             },
+            defaults: body,
         });
 
-        if (result) {
+        if (!result) {
+
             return res.status(400).json({ error: 'This email or handle are already used.' });
+
         }
 
-        // const role = await Role.findOne({ where: { role_name: ['user'] } });
-        
-        const user = await User.create({
-            user_profile: user_profile,
-            user_handle: user_handle,
-            user_email: user_email,
-            user_first_name: user_first_name,
-            user_last_name: user_last_name,
-            user_description: user_description,
-            user_password: user_password,
-            role_id: role_id
-        });
-
-        // console.log(user.toJSON());
         return res.status(201).json({ user });
 
     } catch (error) {
@@ -121,35 +104,24 @@ export const createUser = async (req: Request, res: Response): Promise<Response>
 }
 
 export const updateUser = async (req: Request, res: Response): Promise<Response> => {
-    
-    const user_id = req.params.user_id;
-    
-    const { user_profile, user_handle, user_email, user_first_name, 
-        user_last_name, user_description, user_password } = req.body;
+
+    const { user_id } = req.params;
+    const { body } = req;
 
     try {
-        
+
         const result = await User.findByPk(user_id);
 
         if (!result) {
+
             return res.status(404).json({ error: 'User not found.' });
+
         }
-        
-        const hashedPassword = await hashPassword(user_password);
 
-        const user = await User.update({
-            user_profile: user_profile,
-            user_handle: user_handle,
-            user_email: user_email,
-            user_first_name: user_first_name,
-            user_last_name: user_last_name,
-            user_description: user_description,
-            user_password: hashedPassword
-        }, {
-            where: { user_id: user_id }
-        });
+        await result.update(body);
+        await result.save();
 
-        return res.status(204).json({ user });
+        return res.status(204).json({ result });
 
     } catch (error) {
 
@@ -161,25 +133,24 @@ export const updateUser = async (req: Request, res: Response): Promise<Response>
 
 export const deleteUser = async (req: Request, res: Response): Promise<Response> => {
     
-    const user_id = req.params.user_id;
+    const { user_id } = req.params;
     
     try {
         
         const result = await User.findByPk(user_id);
 
         if (!result) {
+
             return res.status(404).json({ error: 'User not found.' });
+
         }
-
-        const user_status = await User.findOne({ where: { user_id: user_id }});
-
+        
         const user = await User.update({
-            user_status: user_status?.user_status ? false : true
+            user_status: result?.user_status ? false : true
         }, {
             where: { user_id: user_id }
         });
 
-        // console.log(user);
         return res.status(200).json({ user });
 
     } catch (error) {

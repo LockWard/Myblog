@@ -5,16 +5,12 @@ import Follower from '../models/follower.models.js';
 
 export const createFollower = async (req: Request, res: Response): Promise<Response> => {
     
-    const { follower_id, following_id } = req.body;
+    const { body } = req;
     
     try {
         
-        const follower = await Follower.create({
-            follower_id: follower_id,
-            following_id: following_id
-        });
+        const follower = await Follower.create(body);
 
-        // console.log(follower.toJSON());
         return res.status(201).json({ follower });
 
     } catch (error) {
@@ -27,18 +23,17 @@ export const createFollower = async (req: Request, res: Response): Promise<Respo
 
 export const deleteFollower = async (req: Request, res: Response): Promise<Response> => {
     
-    const { follower_id, following_id } = req.body;
+    const { body } = req;
     
     try {
 
         const follower = await Follower.destroy({
             where: { 
                 [Sequelize.Op.and]: 
-                    [{ follower_id: follower_id }, { following_id: following_id }],
+                    [{ follower_id: body.follower_id }, { following_id: body.following_id }],
             },
         });
 
-        // console.log(follower);
         return res.status(200).json({ follower });
 
     } catch (error) {

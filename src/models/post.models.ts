@@ -1,6 +1,6 @@
 import { DataTypes, Model } from 'sequelize';
 
-import { sequelize } from '../database/connection.js'; // Import the Sequelize instance
+import { sequelize } from '../database/connection.js'; // Import the sequelize instance
 import User from './user.models.js'; // Import the Sequelize model for the foreign key
 
 class Post extends Model {
@@ -8,9 +8,10 @@ class Post extends Model {
     declare post_title: string;
     declare post_text: string;
     declare post_media: string;
-    declare post_num_votes: number;
-    declare post_num_comments: number;
-    declare post_num_shared: number;
+    declare post_vote_count: number;
+    declare post_comment_count: number;
+    // declare post_num_shared: number;
+    declare post_hidden: boolean;
     declare post_status: boolean;
     declare created_at: string;
     declare updated_at: string;
@@ -40,21 +41,26 @@ Post.init(
                 isUrl: true,
             }
         },
-        post_num_votes: {
+        post_vote_count: {
             type: DataTypes.INTEGER,
             allowNull: false,
             defaultValue: 0,
         },
-        post_num_comments: {
+        post_comment_count: {
             type: DataTypes.INTEGER,
             allowNull: false,
             defaultValue: 0,
         },
-        post_num_shared: {
+/*         post_num_shared: {
             type: DataTypes.INTEGER,
             allowNull: false,
             defaultValue: 0,
-        },      
+        },  */
+        post_hidden: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false,
+        }, 
         post_status: {
             type: DataTypes.BOOLEAN,
             allowNull: false,

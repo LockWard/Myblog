@@ -1,6 +1,6 @@
 import { DataTypes, Model } from 'sequelize';
 
-import { sequelize } from '../database/connection.js'; // Import the Sequelize instance
+import { sequelize } from '../database/connection.js'; // Import the sequelize instance
 import User from './user.models.js'; // Import the Sequelize model for the foreign key
 
 class Notification extends Model {
@@ -19,7 +19,7 @@ Notification.init(
             defaultValue: DataTypes.UUIDV4,
         },
         notification_type: {
-            type: DataTypes.ENUM('post', 'message', 'follow', 'vote'),
+            type: DataTypes.ENUM('post', 'message', 'follow', 'upvote', 'downvote'),
             allowNull: false,
         },
         recipient_id: {
@@ -44,6 +44,7 @@ Notification.init(
     {
         sequelize,
         createdAt: 'created_at',
+        updatedAt: false,
         timestamps: true,
         freezeTableName: true,
         // modelName: 'Notification', // Set the model name

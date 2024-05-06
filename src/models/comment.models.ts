@@ -1,13 +1,13 @@
 import { DataTypes, Model } from 'sequelize';
 
-import { sequelize } from '../database/connection.js'; // Import the Sequelize instance
+import { sequelize } from '../database/connection.js'; // Import the sequelize instance
 import User from './user.models.js'; // Import the Sequelize model for the foreign key
-import Post from './post.models.js'; // ...
+import Post from './post.models.js';
 
 class Comment extends Model {
     declare comment_id: string;
     declare comment_text: string;
-    declare comment_num_votes: number;
+    declare comment_vote_count: number;
     declare comment_status: boolean;
     declare created_at: string;
     declare updated_at: string;
@@ -26,7 +26,7 @@ Comment.init(
             type: DataTypes.TEXT('tiny'),
             allowNull: false,
         },
-        comment_num_votes: {
+        comment_vote_count: {
             type: DataTypes.INTEGER,
             allowNull: false,
             defaultValue: 0,

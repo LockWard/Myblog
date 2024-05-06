@@ -1,7 +1,7 @@
 import { DataTypes, Model } from 'sequelize';
 import bcrypt from 'bcrypt';
 
-import { sequelize } from '../database/connection.js'; // Import the Sequelize instance
+import { sequelize } from '../database/connection.js'; // Import the sequelize instance
 import Role from './role.models.js'; // Import the Sequelize model for the foreign key
 // import Follower from './follower.models.js';
 
@@ -13,18 +13,16 @@ class User extends Model {
     declare user_first_name: string;
     declare user_last_name: string;
     declare user_follower_count: number;
+    declare user_post_count: number;
+    declare user_comment_count: number;
+    // declare user_upvote_count: number;
+    // declare user_downvote_count: number;
     declare user_description: string;
     declare user_password: string; // Stored hashed password
     declare user_status: boolean;
     declare created_at: string;
     declare updated_at: string;
     declare role_id: string;
-
-/*     async comparePassword(password: string): Promise<boolean> {
-
-        return bcrypt.compare(password, this.user_password);
-
-    } */
 }
 
 User.init(
@@ -36,6 +34,7 @@ User.init(
         },
         user_profile: {
             type: DataTypes.STRING,
+            defaultValue: null,
 
             validate: {
                 isUrl: true,
@@ -80,9 +79,19 @@ User.init(
             allowNull: false,
             defaultValue: 0,
         },
+        user_post_count: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            defaultValue: 0,
+        },
+        user_comment_count: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            defaultValue: 0,
+        },
         user_description: {
             type: DataTypes.TEXT('tiny'),
-            allowNull: true,
+            defaultValue: null,
         },
         user_password: {
             type: DataTypes.STRING(125),
@@ -124,19 +133,26 @@ User.beforeCreate(async (user) => {
 
 });
 
-/* User.beforeUpdate(async (user) => {
+User.beforeUpdate(async (user) => {
     if (user.changed('user_password')) {
 
         const hashedPassword = await bcrypt.hash(user.user_password, 10);
         user.user_password = hashedPassword;
         
     }
-}); */
+});
 
 export const hashPassword = async (user_password: string): Promise<string> => {
 
     const salt = await bcrypt.genSalt(10)
     return await bcrypt.hash(user_password, salt);
+
+}
+
+export const comparePassword = async (user_password: string, user_password_received: string): Promise<boolean> => {
+
+    return bcrypt.compare(user_password, user_password_received);
+
 }
 
 /* Follower.afterCreate(async (Follower) => {
@@ -147,12 +163,6 @@ export const hashPassword = async (user_password: string): Promise<string> => {
         console.error('Error updating user follower count:', error);
     }
 }); */
-
-export const comparePassword = async (user_password: string, user_password_received: string): Promise<boolean> => {
-
-    return bcrypt.compare(user_password, user_password_received);
-
-}
 
 await User.sync();
 console.log("The table for the User model was just changes in the table to make it match the model!");

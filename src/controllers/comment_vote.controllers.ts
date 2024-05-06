@@ -5,17 +5,12 @@ import Comment_vote from '../models/comment_vote.models.js';
 
 export const createComment_vote = async (req: Request, res: Response): Promise<Response> => {
     
-    const { user_id, comment_id, comment_vote_reaction } = req.body;
+    const { body } = req;
     
     try {
         
-        const comment_vote = await Comment_vote.create({
-            user_id: user_id,
-            comment_id: comment_id,
-            comment_vote_reaction: comment_vote_reaction
-        });
+        const comment_vote = await Comment_vote.create(body);
 
-        // console.log(comment_vote.toJSON());
         return res.status(201).json({ comment_vote });
 
     } catch (error) {
@@ -28,18 +23,17 @@ export const createComment_vote = async (req: Request, res: Response): Promise<R
 
 export const deleteComment_vote = async (req: Request, res: Response): Promise<Response> => {
     
-    const { user_id, comment_id } = req.body;
+    const { body } = req;
     
     try {
 
         const comment_vote = await Comment_vote.destroy({
             where: { 
                 [Sequelize.Op.and]: 
-                    [{ comment_id: comment_id }, { user_id: user_id }],
+                    [{ comment_id: body.comment_id }, { user_id: body.user_id }],
             },
         });
 
-        // console.log(comment_vote);
         return res.status(200).json({ comment_vote });
 
     } catch (error) {
