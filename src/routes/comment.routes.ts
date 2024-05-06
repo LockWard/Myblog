@@ -14,6 +14,6 @@ router.post('/', passport.authenticate('jwt', { session: false }), commentContro
 
 router.put('/:comment_id', passport.authenticate('jwt', { session: false }), commentControllers.updateComment);
 
-router.put('/delete/:comment_id', passport.authenticate('jwt', { session: false }), [isModerator, isAdmin], commentControllers.deleteComment);
+router.delete('/delete/:comment_id', passport.authenticate('jwt', { session: false }), [isModerator, isAdmin], commentControllers.deleteComment);
 
 export default router;

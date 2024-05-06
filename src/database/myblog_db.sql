@@ -32,8 +32,10 @@ CREATE TABLE user (
     user_first_name VARCHAR(100) NOT NULL,
     user_last_name VARCHAR(100) NOT NULL,
     user_follower_count INT DEFAULT 0,
-    -- user_post_count INT DEFAULT 0,
-    -- user_comment_count INT DEFAULT 0,
+    user_post_count INT DEFAULT 0,
+    user_comment_count INT DEFAULT 0,
+    -- user_upvote_count INT DEFAULT 0,
+    -- user_downvote_count INT DEFAULT 0,
     user_description TINYTEXT DEFAULT NULL,
     user_password VARCHAR(125) NOT NULL,
     user_status BOOLEAN DEFAULT true,
@@ -78,7 +80,7 @@ DROP TABLE if EXISTS notification;
 
 CREATE TABLE notification (
     notification_id VARCHAR(100) NOT NULL,
-    notification_type ENUM('post', 'message', 'follow', 'vote') NOT NULL,
+    notification_type ENUM('post', 'message', 'follow', 'upvote', 'downvote') NOT NULL,
     recipient_id VARCHAR(100) NOT NULL,
     sender_id VARCHAR(100) NOT NULL,
     notification_text TINYTEXT NOT NULL,
@@ -127,9 +129,10 @@ CREATE TABLE post(
     post_title VARCHAR(125) NOT NULL,
     post_text TEXT NOT NULL,
     post_media VARCHAR(255) DEFAULT NULL,
-    post_num_votes INT DEFAULT 0,
-    post_num_comments INT DEFAULT 0,
-    post_num_shared INT DEFAULT 0,
+    post_vote_count INT DEFAULT 0,
+    post_comment_count INT DEFAULT 0,
+    -- post_num_shared INT DEFAULT 0,
+    post_hidden BOOLEAN DEFAULT FALSE NOT NULL,
     post_status BOOLEAN DEFAULT TRUE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -150,7 +153,7 @@ DROP TABLE if EXISTS post_vote;
 CREATE TABLE post_vote(
     user_id VARCHAR(100) NOT NULL,
     post_id VARCHAR(100) NOT NULL,
-    post_vote_reaction ENUM('Like', 'Dislike') DEFAULT NULL,
+    post_vote_reaction ENUM('upvote', 'downvote') NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY(user_id, post_id),
     Foreign Key (user_id) REFERENCES user(user_id),
@@ -169,7 +172,7 @@ DROP TABLE if EXISTS comment;
 CREATE TABLE comment(
     comment_id VARCHAR(100) NOT NULL,
     comment_text TINYTEXT NOT NULL,
-    comment_num_votes INT DEFAULT 0,
+    comment_vote_count INT DEFAULT 0,
     comment_status BOOLEAN DEFAULT TRUE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -192,7 +195,7 @@ DROP TABLE if EXISTS comment_vote;
 CREATE TABLE comment_vote(
     user_id VARCHAR(100) NOT NULL,
     comment_id VARCHAR(100) NOT NULL,
-    comment_vote_reaction ENUM('Like', 'Dislike') DEFAULT NULL,
+    comment_vote_reaction ENUM('upvote', 'downvote') NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY(user_id, comment_id),
     Foreign Key (user_id) REFERENCES user(user_id),
@@ -205,7 +208,55 @@ CREATE TABLE comment_vote(
 -- DROP TABLE comment_vote;
 
 -- TRIGGERS
---FOLLOWERS
+-- USER POSTS COUNT IN USER
+
+DROP TRIGGER if EXISTS increase_user_post_count; 
+DELIMITER $$
+CREATE TRIGGER increase_user_post_count
+AFTER INSERT ON post
+FOR EACH ROW
+BEGIN
+    UPDATE user SET user_post_count = user_post_count + 1
+    WHERE user_id = NEW.user_id;
+END $$
+DELIMITER ;
+
+DROP TRIGGER if EXISTS decrease_user_post_count; 
+DELIMITER $$
+CREATE TRIGGER decrease_user_post_count
+AFTER INSERT ON post
+FOR EACH ROW
+BEGIN
+    UPDATE user SET user_post_count = user_post_count - 1
+    WHERE user_id = NEW.user_id;
+END $$
+DELIMITER ;
+
+-- USER COMMENTS COUNT IN USER
+
+DROP TRIGGER if EXISTS increase_user_comment_count; 
+DELIMITER $$
+CREATE TRIGGER increase_user_comment_count
+AFTER INSERT ON comment
+FOR EACH ROW
+BEGIN
+    UPDATE user SET user_comment_count = user_comment_count + 1
+    WHERE user_id = NEW.user_id;
+END $$
+DELIMITER ;
+
+DROP TRIGGER if EXISTS decrease_user_comment_count; 
+DELIMITER $$
+CREATE TRIGGER decrease_user_commnet_count
+AFTER INSERT ON comment
+FOR EACH ROW
+BEGIN
+    UPDATE user SET user_commet_count = user_comment_count - 1
+    WHERE user_id = NEW.user_id;
+END $$
+DELIMITER ;
+
+--USER FOLLOWERS COUNT IN USER
 
 DROP TRIGGER if EXISTS increase_follower_count; 
 DELIMITER $$
@@ -237,7 +288,7 @@ CREATE TRIGGER increase_post_vote_count
 AFTER INSERT ON post_vote
 FOR EACH ROW
 BEGIN
-    UPDATE post SET post_num_votes = post_num_votes + 1
+    UPDATE post SET post_vote_count = post_vote_count + 1
     WHERE post_id = NEW.post_id;
 END $$
 DELIMITER ;
@@ -248,7 +299,7 @@ CREATE TRIGGER decrease_post_vote_count
 AFTER DELETE ON post_vote
 FOR EACH ROW
 BEGIN
-    UPDATE post SET post_num_votes = post_num_votes - 1
+    UPDATE post SET post_vote_count = post_vote_count - 1
     WHERE post_id = OLD.post_id;
 END $$
 DELIMITER ;
@@ -261,7 +312,7 @@ CREATE TRIGGER increase_post_comment_count
 AFTER INSERT ON comment
 FOR EACH ROW
 BEGIN
-    UPDATE post SET post_num_comments = post_num_comments + 1
+    UPDATE post SET post_comment_count = post_comment_count + 1
     WHERE post_id = NEW.post_id;
 END $$
 DELIMITER ;
@@ -273,7 +324,7 @@ AFTER UPDATE ON comment
 FOR EACH ROW
 BEGIN
     IF NEW.comment_status = FALSE THEN
-    UPDATE post SET post_num_comments = post_num_comments - 1
+    UPDATE post SET post_comment_count = post_comment_count - 1
     WHERE post_id = OLD.post_id;
     END IF;
 END; $$
@@ -285,7 +336,7 @@ DELIMITER ;
 -- AFTER DELETE ON comment
 -- FOR EACH ROW
 -- BEGIN
---     UPDATE post SET post_num_comments = post_num_comments - 1
+--     UPDATE post SET post_comment_count = post_comment_count - 1
 --     WHERE post_id = OLD.post_id;
 -- END $$
 -- DELIMITER ;
@@ -298,7 +349,7 @@ CREATE TRIGGER increase_comment_vote_count
 AFTER INSERT ON comment_vote
 FOR EACH ROW
 BEGIN
-    UPDATE comment SET comment_num_votes = comment_num_votes + 1
+    UPDATE comment SET comment_vote_count = comment_vote_count + 1
     WHERE comment_id = NEW.comment_id;
 END $$
 DELIMITER ;
@@ -309,7 +360,7 @@ CREATE TRIGGER decrease_comment_vote_count
 AFTER DELETE ON comment_vote
 FOR EACH ROW
 BEGIN
-    UPDATE comment SET comment_num_votes = comment_num_votes - 1
+    UPDATE comment SET comment_vote_count = comment_vote_count - 1
     WHERE comment_id = OLD.comment_id;
 END $$
 DELIMITER ;

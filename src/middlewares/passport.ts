@@ -11,13 +11,17 @@ const options: StrategyOptions = {
 export default new Strategy(options, async (payload, done) => {
 	try {
 		
-		const result = await User.findByPk(payload.id);
+		const result = await User.findByPk(payload.user_id);
 
 		if (result) {
-			return done(null, result);
-		}
 
-		return done(null, false);
+			return done(null, result);
+
+		} else {
+
+			return done(null, false);
+
+		}
 
 	} catch (error) {
 

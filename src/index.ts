@@ -23,6 +23,6 @@ passport.use(passportMiddleware);
 app.use('/', routes);
 
 // Static files
-app.use(express.static('public')); 
+app.use(express.static('public'));
 
 export default app;

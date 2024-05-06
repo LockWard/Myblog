@@ -14,7 +14,7 @@ router.post('/', passport.authenticate('jwt', { session: false }), postControlle
 
 router.put('/:post_id', passport.authenticate('jwt', { session: false }), postControllers.updatePost);
 
-router.put('/delete/:post_id', passport.authenticate('jwt', { session: false }), [isModerator, isAdmin], postControllers.deletePost);
+router.delete('/delete/:post_id', passport.authenticate('jwt', { session: false }), [isModerator, isAdmin], postControllers.deletePost);
 
 export default router;
 

@@ -6,7 +6,7 @@ import * as userControllers from '../controllers/user.controllers.js';
 
 const router: Router = Router();
 
-router.get('/', passport.authenticate('jwt', { session:false }), userControllers.getAllUsers);
+router.get('/', userControllers.getAllUsers);
 
 router.get('/:user_id', userControllers.getUserById);
 
@@ -14,8 +14,8 @@ router.get('/search/name', userControllers.getUserByUserhandle);
 
 router.post('/', userControllers.createUser);
 
-router.put('/:user_id', passport.authenticate('jwt', { session: false }), [isModerator, isAdmin], userControllers.updateUser);
+router.put('/:user_id', passport.authenticate('jwt', { session: false }), userControllers.updateUser);
 
-router.put('/delete/:user_id', passport.authenticate('jwt', { session: false }), [isModerator, isAdmin], userControllers.deleteUser);
+router.delete('/:user_id', passport.authenticate('jwt', { session: false }), [isModerator, isAdmin], userControllers.deleteUser);
 
 export default router;

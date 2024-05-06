@@ -14,9 +14,10 @@ export const isAdmin: RequestHandler = async (req: Request, res: Response, next:
             }
         }); */
 
-        const result = req.body.dataValues.role_id;
-        
+        const result = req.body.dataValues?.role_id;
+
         const role = await Role.findByPk(result);
+        
         if (role?.role_name == 'admin') {
 
             return next();
@@ -45,8 +46,10 @@ export const isModerator: RequestHandler = async (req: Request, res: Response, n
         }); */
 
         const result = req.body.dataValues.role_id;
+        
+        const role = await Role.findByPk(result);
 
-        if (result?.role_name == 'moderator' || result?.role_name == 'admin') {
+        if (role?.role_name == 'moderator' || role?.role_name == 'admin') {
 
             return next();
 

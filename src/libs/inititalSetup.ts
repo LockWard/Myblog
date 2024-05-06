@@ -10,7 +10,6 @@ import { ADMIN_HANDLE,
 export const createRoles = async () => {
     try {
         const role = await Role.count();
-        // const role = await Role.findAll();
 
             if (role > 0) {
                 console.log('Role admin, moderator and admin are already exist.');
@@ -23,7 +22,6 @@ export const createRoles = async () => {
                     Role.create({ role_name: 'admin' }),
                 ]);
 
-                // console.log(value[0]);
                 console.log('Role admin, moderator and user have been created.');    
             }
             
@@ -34,7 +32,7 @@ export const createRoles = async () => {
         }
     }
 
-    export const createAdmin = async () => {
+export const createAdmin = async () => {
     try {
         // Get id of admin
         const role = await Role.findOne({
@@ -54,11 +52,10 @@ export const createRoles = async () => {
                 user_first_name: ADMIN_FIRST_NAME,
                 user_last_name: ADMIN_LAST_NAME,
                 user_password: ADMIN_PASSWORD,
-                role_id: (role?.role_id)
+                role_id: role?.role_id
             }
             
         });
-        // console.log('this is the role id: ' + role?.role_id)
         // result return a boolean. If it is true return this
         if (result) {
 
