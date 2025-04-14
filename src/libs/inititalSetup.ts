@@ -40,7 +40,7 @@ export const createAdmin = async () => {
         });
         
         // checking for a existing admin user.
-        // if not exist, reate a new admin user
+        // if not exist, create a new admin user
         const [user, result] = await User.findOrCreate({
 
             where: {
@@ -56,7 +56,7 @@ export const createAdmin = async () => {
             }
             
         });
-        // result return a boolean. If it is true return this
+        // result return a boolean
         if (result) {
 
             console.log('The user: ', user.user_handle, ' has been created.');

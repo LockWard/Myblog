@@ -82,7 +82,7 @@ export const signIn = async (req: Request, res: Response): Promise<Response> => 
         
         if (result.user_status == false) {
 
-            return res.status(404).json({ message: 'This account is disabled. Please comnunicated with the administrator.'});
+            return res.status(403).json({ message: 'This account is disabled. Please comnunicated with the administrator.'});
 
         }
 

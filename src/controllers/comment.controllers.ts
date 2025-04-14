@@ -6,7 +6,7 @@ import Sequelize from 'sequelize';
 export const getAllComments = async (_req: Request, res: Response): Promise<Response> => {
     try {
         
-        const result = await Comment.findAll(); // Create a Comment
+        const result = await Comment.findAll(); // Get all Comments
 
         return res.status(200).json({ result });
 
